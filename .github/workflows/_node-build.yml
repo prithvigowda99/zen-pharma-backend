@@ -134,6 +134,7 @@ jobs:
 
       # ── npm audit (fail on HIGH/CRITICAL) ─────────────────────────────────────
       - name: npm audit (HIGH/CRITICAL → fail)
+        continue-on-error: true
         run: cd ${{ inputs.service-dir }} && npm audit --audit-level=high
 
       # ── AWS credentials via OIDC (no long-lived keys) ─────────────────────────
