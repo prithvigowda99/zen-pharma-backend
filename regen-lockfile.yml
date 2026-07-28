@@ -1,0 +1,43 @@
+# TEMPORARY — one-off helper to regenerate notification-service/package-lock.json
+# Run manually from the Actions tab, then DELETE this file once done.
+#
+# Setup:
+#   1. Commit this file to .github/workflows/regen-lockfile.yml on your branch
+#   2. Go to Actions tab → "Regenerate lockfile — notification-service" → Run workflow
+#   3. It will push a new commit with the updated package-lock.json to the same branch
+#   4. Delete this workflow file afterward (it has write access to the repo)
+
+name: Regenerate lockfile — notification-service
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: npm install (regenerate lockfile)
+        run: cd notification-service && npm install
+
+      - name: Commit updated lockfile
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add notification-service/package-lock.json
+          if git diff --staged --quiet; then
+            echo "Lockfile already up to date — nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: regenerate package-lock.json for security patch"
+          git push
